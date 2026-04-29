@@ -20,7 +20,8 @@ async function loadFormations(): Promise<Formation[]> {
         )
       `,
     )
-    .order("event_date", { ascending: false, nullsFirst: false });
+    .order("event_date", { ascending: false, nullsFirst: false })
+    .range(0, 9999);  // PostgREST defaults cap at 1000; we want all formations
 
   if (error) {
     console.error("loadFormations error", error);
