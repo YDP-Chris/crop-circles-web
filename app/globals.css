@@ -401,6 +401,104 @@ aside.sidebar h2 {
   color: #cfcfcf;
 }
 
+/* Calendar heatmap */
+.calendar-heatmap {
+  margin: 16px 0;
+  font-size: 11px;
+}
+
+.calendar-row {
+  display: grid;
+  grid-template-columns: 30px repeat(31, 1fr);
+  gap: 2px;
+  margin-bottom: 2px;
+  align-items: center;
+}
+
+.calendar-row.calendar-header {
+  margin-bottom: 4px;
+  color: #666;
+}
+
+.calendar-tick {
+  text-align: center;
+  font-size: 9px;
+  color: #555;
+}
+
+.calendar-mo {
+  color: #888;
+  font-size: 11px;
+}
+
+.calendar-cell {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 12px;
+  border-radius: 2px;
+}
+
+/* Crop type evolution stacked bars */
+.crop-stack {
+  margin: 16px 0;
+}
+
+.crop-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.crop-year {
+  color: #888;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.crop-track {
+  display: flex;
+  height: 14px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #131315;
+  min-width: 30px;
+}
+
+.crop-seg {
+  height: 100%;
+}
+
+.crop-total {
+  color: #cfcfcf;
+  font-variant-numeric: tabular-nums;
+}
+
+.crop-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: 12px 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.crop-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crop-legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
 /* Pewsey heritage labels */
 .leaflet-tooltip.pewsey-heritage-label {
   background: rgba(15, 15, 16, 0.85);

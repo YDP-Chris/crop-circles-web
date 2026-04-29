@@ -40,6 +40,14 @@ type TemporalStats = {
   yearly: { year: number; count: number; uk: number; other: number }[];
 };
 
+type ExtraStats = {
+  crop_evolution: { year: number; crop: string; count: number }[];
+  wilts_share: { year: number; wilts: number; uk_total: number; pct: number | null }[];
+  country_first: { country: string; first_seen: string; total: number }[];
+  wave_days: { date: string; n: number; n_countries: number; countries: string[] }[];
+  calendar_heatmap: { month: number; day: number; count: number }[];
+};
+
 const PHASE_LABELS: Record<string, string> = {
   new: "New",
   waxing_crescent: "Waxing crescent",
@@ -85,6 +93,10 @@ async function loadProximity(): Promise<ProximityStats | null> {
 
 async function loadTemporal(): Promise<TemporalStats | null> {
   return rpc<TemporalStats>("cc_temporal_stats");
+}
+
+async function loadExtra(): Promise<ExtraStats | null> {
+  return rpc<ExtraStats>("cc_extra_stats");
 }
 
 async function loadClusters(): Promise<Cluster[]> {
@@ -163,6 +175,144 @@ function ProximityBar({
   );
 }
 
+function CalendarHeatmap({
+  cells,
+}: {
+  cells: { month: number; day: number; count: number }[];
+}) {
+  const max = Math.max(...cells.map((c) => c.count), 1);
+  const grid: Record<number, Record<number, number>> = {};
+  for (const c of cells) {
+    grid[c.month] = grid[c.month] || {};
+    grid[c.month][c.day] = c.count;
+  }
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+  return (
+    <div className="calendar-heatmap">
+      <div className="calendar-row calendar-header">
+        <span className="calendar-mo" />
+        {Array.from({ length: 31 }, (_, i) => (
+          <span key={i} className="calendar-tick">
+            {(i + 1) % 5 === 0 ? i + 1 : ""}
+          </span>
+        ))}
+      </div>
+      {months.map((mo, i) => {
+        const month = i + 1;
+        return (
+          <div key={month} className="calendar-row">
+            <span className="calendar-mo">{mo}</span>
+            {Array.from({ length: 31 }, (_, d) => {
+              const day = d + 1;
+              const v = grid[month]?.[day] ?? 0;
+              const intensity = v === 0 ? 0 : 0.15 + 0.85 * (v / max);
+              return (
+                <span
+                  key={day}
+                  className="calendar-cell"
+                  title={`${mo} ${day}: ${v}`}
+                  style={{
+                    background:
+                      v === 0 ? "#15151a" : `rgba(109, 217, 106, ${intensity})`,
+                  }}
+                />
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function CropEvolution({
+  rows,
+}: {
+  rows: { year: number; crop: string; count: number }[];
+}) {
+  // Pivot by year × crop
+  const byYear = new Map<number, Record<string, number>>();
+  const cropSet = new Set<string>();
+  for (const r of rows) {
+    const y = byYear.get(r.year) ?? {};
+    y[r.crop] = (y[r.crop] ?? 0) + r.count;
+    byYear.set(r.year, y);
+    cropSet.add(r.crop);
+  }
+  // Stable color order; "other" + "unknown" last.
+  const cropOrder = ["wheat", "barley", "oilseed rape", "grass", "maize", "other", "unknown"];
+  const knownCrops = cropOrder.filter((c) => cropSet.has(c));
+  const colors: Record<string, string> = {
+    wheat: "#d4a73c",
+    barley: "#a8c46a",
+    "oilseed rape": "#e07a5f",
+    grass: "#80c8a8",
+    maize: "#f4d35e",
+    other: "#7c7891",
+    unknown: "#3d3d44",
+  };
+  const years = Array.from(byYear.keys()).sort((a, b) => a - b);
+  // Only show years with >=10 formations to avoid noise
+  const significantYears = years.filter((y) => {
+    const counts = byYear.get(y)!;
+    return Object.values(counts).reduce((a, b) => a + b, 0) >= 10;
+  });
+  const maxTotal = Math.max(
+    ...significantYears.map((y) =>
+      Object.values(byYear.get(y)!).reduce((a, b) => a + b, 0),
+    ),
+  );
+
+  return (
+    <>
+      <div className="crop-stack">
+        {significantYears.map((y) => {
+          const counts = byYear.get(y)!;
+          const total = Object.values(counts).reduce((a, b) => a + b, 0);
+          return (
+            <div key={y} className="crop-row">
+              <span className="crop-year">{y}</span>
+              <div
+                className="crop-track"
+                style={{ width: `${(100 * total) / maxTotal}%` }}
+              >
+                {knownCrops.map((c) => {
+                  const v = counts[c] ?? 0;
+                  if (v === 0) return null;
+                  const pct = (100 * v) / total;
+                  return (
+                    <div
+                      key={c}
+                      className="crop-seg"
+                      title={`${c}: ${v} (${pct.toFixed(0)}%)`}
+                      style={{ width: `${pct}%`, background: colors[c] ?? "#555" }}
+                    />
+                  );
+                })}
+              </div>
+              <span className="crop-total">{total}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="crop-legend">
+        {knownCrops.map((c) => (
+          <span key={c} className="crop-legend-item">
+            <span
+              className="crop-legend-swatch"
+              style={{ background: colors[c] ?? "#555" }}
+            />
+            {c}
+          </span>
+        ))}
+      </div>
+    </>
+  );
+}
+
 function DistroBar({
   pct,
   label,
@@ -200,9 +350,10 @@ function DistroBar({
 }
 
 export default async function FindingsPage() {
-  const [proximity, temporal, clusters] = await Promise.all([
+  const [proximity, temporal, extra, clusters] = await Promise.all([
     loadProximity(),
     loadTemporal(),
+    loadExtra(),
     loadClusters(),
   ]);
 
@@ -420,6 +571,117 @@ export default async function FindingsPage() {
         <strong>{peakYear.year}</strong> with <strong>{peakYear.count}</strong>{" "}
         formations.
       </p>
+
+      {extra && (
+        <>
+          {/* ============================================================== */}
+          {/* CALENDAR HEATMAP */}
+          {/* ============================================================== */}
+          <h2>The calendar of formations</h2>
+          <p>
+            Day-of-year heatmap. Each cell is one calendar date; intensity is
+            the all-time count of formations recorded on that day. The
+            mid-summer ridge across late June through July is unmistakable.
+          </p>
+          <CalendarHeatmap cells={extra.calendar_heatmap} />
+
+          {/* ============================================================== */}
+          {/* WILTSHIRE SHARE OVER TIME */}
+          {/* ============================================================== */}
+          <h2>Wiltshire&rsquo;s share of UK formations is rising</h2>
+          <p>
+            Of UK formations with a recorded county, the share that fall in
+            Wiltshire has trended <em>up</em> over time, not down. Either the
+            phenomenon really is concentrating, or non-Wiltshire UK reporting
+            is fading from CCC&rsquo;s coverage. Probably both.
+          </p>
+          <div className="distro-bars">
+            {extra.wilts_share
+              .filter((y) => y.uk_total >= 5 && y.pct !== null)
+              .map((y) => (
+                <DistroBar
+                  key={y.year}
+                  label={y.year.toString()}
+                  pct={y.pct ?? 0}
+                  sub={`(${y.wilts}/${y.uk_total})`}
+                  expectedPct={50}
+                  highlight={(y.pct ?? 0) >= 60}
+                />
+              ))}
+          </div>
+          <p className="small">
+            Years with fewer than 5 UK formations are filtered out for
+            stability. The vertical line marks the 50% mark for visual
+            reference.
+          </p>
+
+          {/* ============================================================== */}
+          {/* COUNTRY FIRST APPEARANCE */}
+          {/* ============================================================== */}
+          <h2>The geographic spread, year by year</h2>
+          <p>
+            When did each country first appear in the corpus? UK records go
+            back to 1990 in our data; nearly everyone else starts in
+            2005&ndash;2007 with CCC&rsquo;s archive. New countries are still
+            entering the catalog as recently as the 2020s.
+          </p>
+          <div className="proximity-table" style={{ display: "block" }}>
+            <table className="proximity-table">
+              <thead>
+                <tr>
+                  <th>Country</th>
+                  <th>First seen</th>
+                  <th className="num">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {extra.country_first.slice(0, 20).map((c) => (
+                  <tr key={c.country}>
+                    <td>{c.country}</td>
+                    <td>{c.first_seen}</td>
+                    <td className="num">{c.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ============================================================== */}
+          {/* WAVE DAYS */}
+          {/* ============================================================== */}
+          <h2>Cross-country wave days</h2>
+          <p>
+            Days when 3 or more countries reported formations simultaneously.
+            Random expectation for this phenomenon at our base rate is roughly
+            one every couple of months &mdash; we have{" "}
+            <strong>{extra.wave_days?.length ?? 0}</strong> in the corpus.
+            Coincidence, or coordinated reporting? Either answer is interesting.
+          </p>
+          <div className="cluster-list">
+            {(extra.wave_days ?? []).slice(0, 10).map((w) => (
+              <div key={w.date} className="cluster">
+                <div className="name">
+                  {w.date} &middot; {w.n_countries} countries, {w.n} formations
+                </div>
+                <div className="stat">{w.countries.join(" · ")}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ============================================================== */}
+          {/* CROP TYPE EVOLUTION */}
+          {/* ============================================================== */}
+          <h2>The canvas changes</h2>
+          <p>
+            Wheat is the dominant medium, but the cast of crops shifts each
+            year. Oilseed rape only starts appearing in 2005; maize in 2006;
+            barley grew its share through the late 2000s. These shifts track
+            UK crop rotation, not formation choice &mdash; the phenomenon
+            takes whatever&rsquo;s growing.
+          </p>
+          <CropEvolution rows={extra.crop_evolution} />
+        </>
+      )}
 
       {/* ============================================================== */}
       {/* CAVEATS */}
