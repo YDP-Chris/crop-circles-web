@@ -48,6 +48,33 @@ type ExtraStats = {
   calendar_heatmap: { month: number; day: number; count: number }[];
 };
 
+type MoreStats = {
+  day_of_month: { day: number; count: number }[];
+  sunday_by_year: {
+    year: number;
+    total: number;
+    sundays: number;
+    sunday_pct: number | null;
+  }[];
+  canon: {
+    canonical_id: string;
+    event_date: string | null;
+    country: string | null;
+    county: string | null;
+    nearest_landmark: string | null;
+    n_aliases: number;
+    source_slugs: string[];
+  }[];
+};
+
+type WaveNarrative = {
+  wave_date: string;
+  n_countries: number;
+  n_formations: number;
+  countries: string[];
+  narrative: string;
+};
+
 const PHASE_LABELS: Record<string, string> = {
   new: "New",
   waxing_crescent: "Waxing crescent",
@@ -97,6 +124,28 @@ async function loadTemporal(): Promise<TemporalStats | null> {
 
 async function loadExtra(): Promise<ExtraStats | null> {
   return rpc<ExtraStats>("cc_extra_stats");
+}
+
+async function loadMore(): Promise<MoreStats | null> {
+  return rpc<MoreStats>("cc_more_stats");
+}
+
+async function loadWaveNarratives(): Promise<WaveNarrative[]> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const r = await fetch(
+    `${url}/rest/v1/wave_day_narratives?select=wave_date,n_countries,n_formations,countries,narrative&order=n_countries.desc,n_formations.desc&limit=10`,
+    {
+      headers: {
+        "Accept-Profile": "crop_circles",
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+      },
+      next: { revalidate: 600 },
+    },
+  );
+  if (!r.ok) return [];
+  return (await r.json()) as WaveNarrative[];
 }
 
 async function loadClusters(): Promise<Cluster[]> {
@@ -313,6 +362,76 @@ function CropEvolution({
   );
 }
 
+function CropSmallMultiples({
+  rows,
+}: {
+  rows: { year: number; crop: string; count: number }[];
+}) {
+  const cropOrder = ["wheat", "barley", "oilseed rape", "grass", "maize"];
+  const colors: Record<string, string> = {
+    wheat: "#d4a73c",
+    barley: "#a8c46a",
+    "oilseed rape": "#e07a5f",
+    grass: "#80c8a8",
+    maize: "#f4d35e",
+  };
+  // Build per-crop year-count dictionary
+  const perCrop: Record<string, Record<number, number>> = {};
+  const allYears = new Set<number>();
+  for (const r of rows) {
+    if (!cropOrder.includes(r.crop)) continue;
+    perCrop[r.crop] = perCrop[r.crop] || {};
+    perCrop[r.crop][r.year] = (perCrop[r.crop][r.year] ?? 0) + r.count;
+    allYears.add(r.year);
+  }
+  const years = Array.from(allYears).sort((a, b) => a - b);
+  const overallMax = Math.max(
+    ...cropOrder.flatMap((c) =>
+      years.map((y) => perCrop[c]?.[y] ?? 0),
+    ),
+  );
+
+  return (
+    <div className="small-multiples">
+      {cropOrder.map((c) => {
+        const cropMax = Math.max(...years.map((y) => perCrop[c]?.[y] ?? 0));
+        if (cropMax === 0) return null;
+        return (
+          <div key={c} className="small-multiple">
+            <div
+              className="small-multiple-title"
+              style={{ color: colors[c] ?? "#888" }}
+            >
+              {c}
+              <span className="small-multiple-max">peak {cropMax}</span>
+            </div>
+            <div className="small-multiple-bars">
+              {years.map((y) => {
+                const v = perCrop[c]?.[y] ?? 0;
+                return (
+                  <div
+                    key={y}
+                    className="small-multiple-bar"
+                    title={`${c} ${y}: ${v}`}
+                    style={{
+                      height: `${Math.max(2, (100 * v) / Math.max(overallMax, 1))}%`,
+                      background: v > 0 ? colors[c] ?? "#555" : "#1d1d20",
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <div className="small-multiple-axis">
+              <span>{years[0]}</span>
+              <span>{years[years.length - 1]}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function DistroBar({
   pct,
   label,
@@ -350,10 +469,12 @@ function DistroBar({
 }
 
 export default async function FindingsPage() {
-  const [proximity, temporal, extra, clusters] = await Promise.all([
+  const [proximity, temporal, extra, more, narratives, clusters] = await Promise.all([
     loadProximity(),
     loadTemporal(),
     loadExtra(),
+    loadMore(),
+    loadWaveNarratives(),
     loadClusters(),
   ]);
 
@@ -658,14 +779,30 @@ export default async function FindingsPage() {
             Coincidence, or coordinated reporting? Either answer is interesting.
           </p>
           <div className="cluster-list">
-            {(extra.wave_days ?? []).slice(0, 10).map((w) => (
-              <div key={w.date} className="cluster">
-                <div className="name">
-                  {w.date} &middot; {w.n_countries} countries, {w.n} formations
+            {(extra.wave_days ?? []).slice(0, 10).map((w) => {
+              const narr = narratives.find((n) => n.wave_date === w.date);
+              return (
+                <div key={w.date} className="cluster">
+                  <div className="name">
+                    {w.date} &middot; {w.n_countries} countries, {w.n} formations
+                  </div>
+                  <div className="stat">{w.countries.join(" · ")}</div>
+                  {narr && (
+                    <div
+                      className="stat"
+                      style={{
+                        marginTop: 8,
+                        color: "#cfcfcf",
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {narr.narrative}
+                    </div>
+                  )}
                 </div>
-                <div className="stat">{w.countries.join(" · ")}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* ============================================================== */}
@@ -680,6 +817,119 @@ export default async function FindingsPage() {
             takes whatever&rsquo;s growing.
           </p>
           <CropEvolution rows={extra.crop_evolution} />
+
+          {/* ============================================================== */}
+          {/* CROP SMALL MULTIPLES */}
+          {/* ============================================================== */}
+          <h2>Each crop on its own timeline</h2>
+          <p>
+            Same data, different cut. Each crop&rsquo;s absolute count over
+            time tells its own story: wheat dominates, but oilseed rape and
+            maize join the cast in the mid-2000s and barley climbs through
+            the late decade.
+          </p>
+          <CropSmallMultiples rows={extra.crop_evolution} />
+        </>
+      )}
+
+      {more && (
+        <>
+          {/* ============================================================== */}
+          {/* DAY OF MONTH */}
+          {/* ============================================================== */}
+          <h2>The 31st is the rare day</h2>
+          <p>
+            Aggregating across all months: do certain days of the month see
+            more formations than others? With one obvious exception &mdash;
+            the 31st only exists in seven months &mdash; the distribution is
+            close to flat. No mid-month or end-of-month bias.
+          </p>
+          <div className="distro-bars">
+            {more.day_of_month.map((d) => {
+              const total = more.day_of_month.reduce((a, b) => a + b.count, 0);
+              const pct = Math.round((100 * d.count) / total * 10) / 10;
+              return (
+                <DistroBar
+                  key={d.day}
+                  label={d.day.toString()}
+                  pct={pct}
+                  sub={`(${d.count})`}
+                  expectedPct={100 / 31}
+                  highlight={d.day === 31}
+                />
+              );
+            })}
+          </div>
+
+          {/* ============================================================== */}
+          {/* SUNDAY BY YEAR */}
+          {/* ============================================================== */}
+          <h2>Has the Sunday spike weakened over time?</h2>
+          <p>
+            The headline finding above showed Sunday at 21% of the corpus
+            against an expected 14%. If the spike is reporting bias (farmers
+            walk fields on Sunday, log the date), modern smartphones and
+            drones should reduce it: people now spot circles in real time,
+            not on a Sunday-morning walk. Plotted by year:
+          </p>
+          <div className="distro-bars">
+            {more.sunday_by_year.map((y) => (
+              <DistroBar
+                key={y.year}
+                label={y.year.toString()}
+                pct={y.sunday_pct ?? 0}
+                sub={`(${y.sundays}/${y.total})`}
+                expectedPct={100 / 7}
+                highlight={(y.sunday_pct ?? 0) >= 25}
+              />
+            ))}
+          </div>
+          <p className="small">
+            Vertical line marks the expected 14.3%. Years with fewer than 10
+            formations are filtered out.
+          </p>
+
+          {/* ============================================================== */}
+          {/* SOURCE CANON */}
+          {/* ============================================================== */}
+          <h2>The canon &mdash; formations documented in multiple archives</h2>
+          {(more.canon ?? []).length === 0 ? (
+            <p className="small">
+              No formations in the corpus yet have aliases from 2 or more
+              archives. This will populate as Lucy Pringle&rsquo;s archive
+              (currently ingesting) merges into the existing
+              cropcirclecenter.com canonical IDs &mdash; the 1995-2008 era
+              uses the same M&uuml;ller-style scheme on both sites, so cross-
+              archive matches happen automatically. Check back as Pringle
+              finishes.
+            </p>
+          ) : (
+            <>
+              <p>
+                These formations are the famous ones &mdash; documented across
+                multiple independent archives, usually because they were
+                widely photographed in the period. Higher alias count means
+                more independent eyes on the same event.
+              </p>
+              <div className="cluster-list">
+                {(more.canon ?? []).slice(0, 12).map((c) => (
+                  <div key={c.canonical_id} className="cluster">
+                    <div className="name">
+                      {c.canonical_id} &middot; {c.n_aliases} archives
+                    </div>
+                    <div className="stat">
+                      {[c.event_date, c.nearest_landmark, c.county, c.country]
+                        .filter(Boolean)
+                        .join(" &middot; ")}
+                    </div>
+                    <div className="stat" style={{ color: "#666", fontSize: 11 }}>
+                      sources: {c.source_slugs.join(", ")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 

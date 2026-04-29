@@ -20,6 +20,8 @@ export default function RootLayout({
           <Link href="/">Map</Link>
           <Link href="/findings">Findings</Link>
           <Link href="/pewsey">Pewsey</Link>
+          <Link href="/avebury">Avebury</Link>
+          <Link href="/stonehenge">Stonehenge</Link>
           <Link href="/insights">Insights</Link>
         </nav>
         {children}

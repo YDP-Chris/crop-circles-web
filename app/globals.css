@@ -499,6 +499,61 @@ aside.sidebar h2 {
   border-radius: 2px;
 }
 
+/* Small multiples per crop */
+.small-multiples {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.small-multiple {
+  border: 1px solid #232326;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #16161a;
+}
+
+.small-multiple-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.small-multiple-max {
+  font-size: 10px;
+  font-weight: 400;
+  color: #555;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.small-multiple-bars {
+  display: flex;
+  align-items: flex-end;
+  height: 60px;
+  gap: 1px;
+}
+
+.small-multiple-bar {
+  flex: 1 1 auto;
+  min-height: 2px;
+  border-radius: 1px;
+}
+
+.small-multiple-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #555;
+  margin-top: 4px;
+}
+
 /* Pewsey heritage labels */
 .leaflet-tooltip.pewsey-heritage-label {
   background: rgba(15, 15, 16, 0.85);
