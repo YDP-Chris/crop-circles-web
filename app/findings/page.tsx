@@ -507,7 +507,25 @@ export default async function FindingsPage() {
       {/* ============================================================== */}
       {/* HERITAGE PROXIMITY */}
       {/* ============================================================== */}
-      <h2 style={{ marginTop: 8 }}>Crop circles cluster near ancient sites</h2>
+      <nav className="findings-toc">
+        <span className="toc-label">Jump to</span>
+        <a href="#heritage">Heritage proximity</a>
+        <a href="#lunar">Lunar test</a>
+        <a href="#seasonality">Seasonality</a>
+        <a href="#sunday">Sunday spike</a>
+        <a href="#yearly">Yearly trend</a>
+        <a href="#calendar">Calendar heatmap</a>
+        <a href="#wiltshire">Wiltshire share</a>
+        <a href="#countries">Country spread</a>
+        <a href="#waves">Wave days</a>
+        <a href="#crops">Crop evolution</a>
+        <a href="#day-of-month">Day of month</a>
+        <a href="#sunday-by-year">Sunday by year</a>
+        <a href="#canon">Source canon</a>
+        <a href="#caveats">Caveats</a>
+      </nav>
+
+      <h2 id="heritage" style={{ marginTop: 8 }}>Crop circles cluster near ancient sites</h2>
 
       <div className="headline-stat">
         <div className="multiple">{multiple}&times;</div>
@@ -542,7 +560,7 @@ export default async function FindingsPage() {
       {/* ============================================================== */}
       {/* LUNAR */}
       {/* ============================================================== */}
-      <h2>Crop circles do <em>not</em> cluster on full moons</h2>
+      <h2 id="lunar">Crop circles do <em>not</em> cluster on full moons</h2>
 
       <p>
         Long-standing claim in the crop-circle community: formations occur
@@ -586,7 +604,7 @@ export default async function FindingsPage() {
       {/* ============================================================== */}
       {/* SEASONALITY */}
       {/* ============================================================== */}
-      <h2>The phenomenon has a sharp seasonal window</h2>
+      <h2 id="seasonality">The phenomenon has a sharp seasonal window</h2>
 
       <p>
         Formations are bounded by the crop calendar. Wheat ripens in late June
@@ -631,7 +649,7 @@ export default async function FindingsPage() {
       {/* ============================================================== */}
       {/* WEEKDAY */}
       {/* ============================================================== */}
-      <h2>Sunday spike: discovery bias, not weekend hoaxers</h2>
+      <h2 id="sunday">Sunday spike: discovery bias, not weekend hoaxers</h2>
 
       <p>
         Formation dates over-index on Sunday and under-index on Monday-Thursday.
@@ -663,7 +681,7 @@ export default async function FindingsPage() {
       {/* ============================================================== */}
       {/* YEARLY */}
       {/* ============================================================== */}
-      <h2>The phenomenon peaked in the late 2000s</h2>
+      <h2 id="yearly">The phenomenon peaked in the late 2000s</h2>
 
       <p>
         The corpus has a clear arc: a slow build through the 1990s, a sharp
@@ -698,7 +716,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* CALENDAR HEATMAP */}
           {/* ============================================================== */}
-          <h2>The calendar of formations</h2>
+          <h2 id="calendar">The calendar of formations</h2>
           <p>
             Day-of-year heatmap. Each cell is one calendar date; intensity is
             the all-time count of formations recorded on that day. The
@@ -709,7 +727,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* WILTSHIRE SHARE OVER TIME */}
           {/* ============================================================== */}
-          <h2>Wiltshire&rsquo;s share of UK formations is rising</h2>
+          <h2 id="wiltshire">Wiltshire&rsquo;s share of UK formations is rising</h2>
           <p>
             Of UK formations with a recorded county, the share that fall in
             Wiltshire has trended <em>up</em> over time, not down. Either the
@@ -739,7 +757,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* COUNTRY FIRST APPEARANCE */}
           {/* ============================================================== */}
-          <h2>The geographic spread, year by year</h2>
+          <h2 id="countries">The geographic spread, year by year</h2>
           <p>
             When did each country first appear in the corpus? UK records go
             back to 1990 in our data; nearly everyone else starts in
@@ -770,7 +788,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* WAVE DAYS */}
           {/* ============================================================== */}
-          <h2>Cross-country wave days</h2>
+          <h2 id="waves">Cross-country wave days</h2>
           <p>
             Days when 3 or more countries reported formations simultaneously.
             Random expectation for this phenomenon at our base rate is roughly
@@ -808,7 +826,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* CROP TYPE EVOLUTION */}
           {/* ============================================================== */}
-          <h2>The canvas changes</h2>
+          <h2 id="crops">The canvas changes</h2>
           <p>
             Wheat is the dominant medium, but the cast of crops shifts each
             year. Oilseed rape only starts appearing in 2005; maize in 2006;
@@ -821,7 +839,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* CROP SMALL MULTIPLES */}
           {/* ============================================================== */}
-          <h2>Each crop on its own timeline</h2>
+          <h2 id="crops-timeline">Each crop on its own timeline</h2>
           <p>
             Same data, different cut. Each crop&rsquo;s absolute count over
             time tells its own story: wheat dominates, but oilseed rape and
@@ -837,7 +855,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* DAY OF MONTH */}
           {/* ============================================================== */}
-          <h2>The 31st is the rare day</h2>
+          <h2 id="day-of-month">The 31st is the rare day</h2>
           <p>
             Aggregating across all months: do certain days of the month see
             more formations than others? With one obvious exception &mdash;
@@ -864,7 +882,7 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* SUNDAY BY YEAR */}
           {/* ============================================================== */}
-          <h2>Has the Sunday spike weakened over time?</h2>
+          <h2 id="sunday-by-year">Has the Sunday spike weakened over time?</h2>
           <p>
             The headline finding above showed Sunday at 21% of the corpus
             against an expected 14%. If the spike is reporting bias (farmers
@@ -892,16 +910,17 @@ export default async function FindingsPage() {
           {/* ============================================================== */}
           {/* SOURCE CANON */}
           {/* ============================================================== */}
-          <h2>The canon &mdash; formations documented in multiple archives</h2>
+          <h2 id="canon">The canon &mdash; formations documented in multiple archives</h2>
           {(more.canon ?? []).length === 0 ? (
             <p className="small">
               No formations in the corpus yet have aliases from 2 or more
-              archives. This will populate as Lucy Pringle&rsquo;s archive
-              (currently ingesting) merges into the existing
-              cropcirclecenter.com canonical IDs &mdash; the 1995-2008 era
-              uses the same M&uuml;ller-style scheme on both sites, so cross-
-              archive matches happen automatically. Check back as Pringle
-              finishes.
+              archives. Pringle and cropcirclecenter both follow Müller-style
+              canonical-ID conventions but in slightly different formats
+              (lowercase YY-letter on Pringle, uppercase YYYYMMDD-letter on
+              CCC), so they don&rsquo;t auto-merge. The cross-archive dedup
+              pass &mdash; matching by event_date + location proximity
+              instead of by ID &mdash; is queued for a follow-up. This
+              section will populate after that runs.
             </p>
           ) : (
             <>
@@ -936,7 +955,7 @@ export default async function FindingsPage() {
       {/* ============================================================== */}
       {/* CAVEATS */}
       {/* ============================================================== */}
-      <h2>What these numbers do and don&rsquo;t mean</h2>
+      <h2 id="caveats">What these numbers do and don&rsquo;t mean</h2>
       <p className="small">
         Heritage proximity is sampled on the small subset of formations with
         EXIF GPS coords (Wikimedia Commons). Photographer bias matters here:
