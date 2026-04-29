@@ -12,11 +12,21 @@ export type Formation = {
   canonical_id: string | null;
   event_date: string | null;
   country: string | null;
+  county: string | null;
   nearest_landmark: string | null;
+  crop_type: string | null;
+  location_precision_m: number | null;
   notes: string | null;
   lat: number | null;
   lng: number | null;
+  formation_aliases: FormationAlias[];
   formation_images: FormationImage[];
+};
+
+export type FormationAlias = {
+  source_id: string;
+  source_url: string | null;
+  is_primary: boolean;
 };
 
 export type FormationImage = {

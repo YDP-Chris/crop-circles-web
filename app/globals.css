@@ -81,6 +81,30 @@ aside.sidebar h2 {
   margin-top: 4px;
 }
 
+.about-data {
+  padding: 12px;
+  background: #16161a;
+  border: 1px solid #232326;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.about-data h2 {
+  margin: 0 0 8px;
+}
+
+.about-data p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b8b8b8;
+}
+
+.approx-tag {
+  color: #a892ff;
+  font-weight: 600;
+}
+
 .map-wrap {
   position: relative;
   width: 100%;
