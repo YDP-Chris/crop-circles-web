@@ -6,28 +6,39 @@ const MapView = dynamic(() => import("./MapView"), { ssr: false });
 export const revalidate = 300;
 
 async function loadFormations(): Promise<Formation[]> {
-  const { data, error } = await supabase
-    .from("formations")
-    .select(
-      `
-        id, canonical_id, event_date, country, county, nearest_landmark,
-        crop_type, location_precision_m, notes, lat, lng,
-        formation_aliases (source_id, source_url, is_primary),
-        formation_images (source_url, photographer, license, width, height),
-        formation_nearby_sites (
-          distance_m, bearing_deg,
-          heritage_sites ( name, site_type, historic_period )
-        )
-      `,
-    )
-    .order("event_date", { ascending: false, nullsFirst: false })
-    .range(0, 9999);  // PostgREST defaults cap at 1000; we want all formations
+  // Supabase PostgREST caps single-request rows at 1000 even with .range();
+  // paginate explicitly until we've drained the table.
+  const PAGE = 1000;
+  const all: Formation[] = [];
+  let start = 0;
+  for (let safety = 0; safety < 50; safety++) {
+    const { data, error } = await supabase
+      .from("formations")
+      .select(
+        `
+          id, canonical_id, event_date, country, county, nearest_landmark,
+          crop_type, location_precision_m, notes, lat, lng,
+          formation_aliases (source_id, source_url, is_primary),
+          formation_images (source_url, photographer, license, width, height),
+          formation_nearby_sites (
+            distance_m, bearing_deg,
+            heritage_sites ( name, site_type, historic_period )
+          )
+        `,
+      )
+      .order("event_date", { ascending: false, nullsFirst: false })
+      .range(start, start + PAGE - 1);
 
-  if (error) {
-    console.error("loadFormations error", error);
-    return [];
+    if (error) {
+      console.error("loadFormations error", error);
+      break;
+    }
+    const rows = (data ?? []) as unknown as Formation[];
+    all.push(...rows);
+    if (rows.length < PAGE) break;
+    start += PAGE;
   }
-  return (data ?? []) as unknown as Formation[];
+  return all;
 }
 
 export default async function HomePage() {
