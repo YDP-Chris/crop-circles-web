@@ -1,0 +1,221 @@
+export const revalidate = 600;
+
+type Brief = {
+  brief_date: string;
+  summary: string;
+  bullets: Bullet[];
+  model: string;
+  cost_usd: number;
+};
+
+type Bullet = {
+  kind: "anomaly" | "stable" | "thread";
+  text: string;
+  metric_key?: string;
+};
+
+type MetricSnapshot = {
+  snapshot_date: string;
+  metric_key: string;
+  value: number | null;
+  baseline: number | null;
+  z_score: number | null;
+  is_anomaly: boolean;
+  details: Record<string, unknown> | null;
+};
+
+const METRIC_LABELS: Record<string, string> = {
+  corpus_size: "Total formations",
+  weekly_count: "Last 7 days (events)",
+  wiltshire_share_uk: "Wiltshire share of UK (90d)",
+  cross_country_wave_days: "Cross-country wave days (30d)",
+  heritage_pct_500m: "Within 500m of heritage (yr)",
+};
+
+async function loadLatestBrief(): Promise<Brief | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const r = await fetch(
+    `${url}/rest/v1/daily_briefs?select=brief_date,summary,bullets,model,cost_usd&order=brief_date.desc&limit=1`,
+    {
+      headers: {
+        "Accept-Profile": "crop_circles",
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+      },
+      next: { revalidate: 600 },
+    },
+  );
+  if (!r.ok) {
+    console.error("loadLatestBrief failed", r.status);
+    return null;
+  }
+  const rows = (await r.json()) as Brief[];
+  return rows[0] ?? null;
+}
+
+async function loadLatestMetrics(): Promise<MetricSnapshot[]> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  // Get the most recent snapshot_date per metric_key
+  const r = await fetch(
+    `${url}/rest/v1/metric_snapshots?select=*&order=snapshot_date.desc&limit=20`,
+    {
+      headers: {
+        "Accept-Profile": "crop_circles",
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+      },
+      next: { revalidate: 600 },
+    },
+  );
+  if (!r.ok) {
+    console.error("loadLatestMetrics failed", r.status);
+    return [];
+  }
+  const all = (await r.json()) as MetricSnapshot[];
+  // Reduce to latest per metric_key
+  const seen = new Set<string>();
+  const latest: MetricSnapshot[] = [];
+  for (const m of all) {
+    if (!seen.has(m.metric_key)) {
+      seen.add(m.metric_key);
+      latest.push(m);
+    }
+  }
+  return latest;
+}
+
+function fmtValue(m: MetricSnapshot): string {
+  if (m.value === null) return "n/a";
+  if (m.metric_key === "corpus_size") return Math.round(m.value).toString();
+  if (
+    m.metric_key.includes("share") ||
+    m.metric_key.includes("pct")
+  )
+    return `${m.value}%`;
+  return Number.isInteger(m.value) ? m.value.toString() : m.value.toFixed(1);
+}
+
+function fmtBaseline(m: MetricSnapshot): string {
+  if (m.baseline === null) return "—";
+  if (m.metric_key === "corpus_size") return Math.round(m.baseline).toString();
+  if (m.metric_key.includes("share") || m.metric_key.includes("pct"))
+    return `${m.baseline}%`;
+  return Number.isInteger(m.baseline)
+    ? m.baseline.toString()
+    : m.baseline.toFixed(1);
+}
+
+function bulletPrefix(kind: Bullet["kind"]): string {
+  if (kind === "anomaly") return "⚠";
+  if (kind === "thread") return "→";
+  return "•";
+}
+
+function bulletColor(kind: Bullet["kind"]): string {
+  if (kind === "anomaly") return "#ffb454";
+  if (kind === "thread") return "#a892ff";
+  return "#888";
+}
+
+export default async function InsightsPage() {
+  const [brief, metrics] = await Promise.all([
+    loadLatestBrief(),
+    loadLatestMetrics(),
+  ]);
+
+  return (
+    <div className="findings">
+      <h1>Insights</h1>
+      <p className="lead">
+        Nightly metrics and a Claude-generated brief on what changed in the
+        corpus and what threads are worth pulling.
+      </p>
+
+      {brief ? (
+        <>
+          <h2>Brief &mdash; {brief.brief_date}</h2>
+          <p>{brief.summary}</p>
+
+          <h2>Highlights</h2>
+          <div>
+            {brief.bullets.map((b, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "20px 1fr",
+                  gap: 10,
+                  padding: "8px 0",
+                  borderBottom: "1px solid #1d1d20",
+                  fontSize: 14,
+                }}
+              >
+                <span style={{ color: bulletColor(b.kind), fontWeight: 600 }}>
+                  {bulletPrefix(b.kind)}
+                </span>
+                <div>
+                  <div style={{ color: "#cfcfcf" }}>{b.text}</div>
+                  {b.metric_key && (
+                    <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
+                      {METRIC_LABELS[b.metric_key] ?? b.metric_key}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="small" style={{ marginTop: 16 }}>
+            Generated by {brief.model.replace("claude-", "Claude ").replace(/-\d+$/, "")} &middot; ${brief.cost_usd.toFixed(4)}
+          </p>
+        </>
+      ) : (
+        <p>No brief yet. The agent runs nightly at 5am UTC.</p>
+      )}
+
+      <h2>Today&rsquo;s metrics</h2>
+      <table className="proximity-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th className="num">Value</th>
+            <th className="num">Baseline</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {metrics.map((m) => (
+            <tr key={m.metric_key}>
+              <td>{METRIC_LABELS[m.metric_key] ?? m.metric_key}</td>
+              <td className="num">{fmtValue(m)}</td>
+              <td className="num">{fmtBaseline(m)}</td>
+              <td>
+                {m.is_anomaly ? (
+                  <span style={{ color: "#ffb454", fontWeight: 600 }}>
+                    anomaly
+                  </span>
+                ) : (
+                  <span style={{ color: "#666" }}>stable</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2>How this works</h2>
+      <p className="small">
+        A nightly agent computes five metrics from the corpus: total formation
+        count, recent weekly event volume vs the same calendar week across
+        prior years, Wiltshire&rsquo;s share of UK formations, cross-country
+        same-day wave events, and the proportion of recent geotagged
+        formations within 500m of an archaeological site. Anomalies are
+        flagged when a value departs from its baseline by more than 1.5 to 2x
+        depending on the metric. Each night Claude reads the metric tape and
+        writes the brief above.
+      </p>
+    </div>
+  );
+}
