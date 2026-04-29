@@ -16,6 +16,27 @@ body {
   color: #e6e6e6;
 }
 
+.site-nav {
+  display: flex;
+  gap: 18px;
+  padding: 10px 24px;
+  background: #0a0a0b;
+  border-bottom: 1px solid #1d1d20;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.site-nav a {
+  color: #888;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.site-nav a:hover {
+  color: #e6e6e6;
+}
+
 header.site-header {
   padding: 16px 24px;
   border-bottom: 1px solid #222;
@@ -127,4 +148,156 @@ aside.sidebar h2 {
     border-left: none;
     border-top: 1px solid #222;
   }
+}
+
+/* Findings page */
+.findings {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  line-height: 1.65;
+}
+
+.findings h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+.findings .lead {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 32px;
+}
+
+.findings h2 {
+  font-size: 18px;
+  margin: 32px 0 12px;
+  font-weight: 600;
+}
+
+.findings p {
+  font-size: 15px;
+  color: #cfcfcf;
+  margin: 0 0 12px;
+}
+
+.findings .small {
+  font-size: 12px;
+  color: #777;
+}
+
+.headline-stat {
+  background: #16161a;
+  border: 1px solid #232326;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 16px 0 24px;
+}
+
+.headline-stat .multiple {
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #6dd96a;
+  line-height: 1;
+}
+
+.headline-stat .multiple-label {
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.headline-stat .summary {
+  margin-top: 18px;
+  font-size: 15px;
+}
+
+.proximity-bars {
+  margin: 16px 0;
+}
+
+.proximity-row {
+  display: grid;
+  grid-template-columns: 88px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.proximity-row .label {
+  color: #888;
+  text-align: right;
+}
+
+.proximity-row .value {
+  font-variant-numeric: tabular-nums;
+}
+
+.proximity-bar-track {
+  height: 10px;
+  background: #1d1d20;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.proximity-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.proximity-bar-fill.formation {
+  background: #6dd96a;
+}
+
+.proximity-bar-fill.random {
+  background: #585866;
+}
+
+.proximity-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.proximity-table th,
+.proximity-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #1d1d20;
+  font-variant-numeric: tabular-nums;
+}
+
+.proximity-table th {
+  font-weight: 500;
+  color: #888;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.proximity-table td.num {
+  text-align: right;
+}
+
+.cluster-list .cluster {
+  padding: 12px 14px;
+  border: 1px solid #232326;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.cluster .name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.cluster .stat {
+  color: #888;
+  font-size: 12px;
+  margin-top: 2px;
 }

@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "An open corpus of crop circle formations.",
 };
 
+import Link from "next/link";
+
 export default function RootLayout({
   children,
 }: {
@@ -13,7 +15,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <nav className="site-nav">
+          <Link href="/">Map</Link>
+          <Link href="/findings">Findings</Link>
+        </nav>
+        {children}
+      </body>
     </html>
   );
 }
