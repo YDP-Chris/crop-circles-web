@@ -26,15 +26,29 @@ type Cluster = {
 };
 
 async function loadStats(): Promise<ProximityStats | null> {
-  const { data, error } = await supabase.rpc("cc_proximity_stats", {
-    p_random_n: 500,
+  // Direct PostgREST RPC call. supabase-js' schema-bound RPC sometimes
+  // doesn't send Accept-Profile correctly for non-public schemas; the raw
+  // fetch is reliable.
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const r = await fetch(`${url}/rest/v1/rpc/cc_proximity_stats`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept-Profile": "crop_circles",
+      "Content-Profile": "crop_circles",
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({ p_random_n: 500 }),
+    next: { revalidate: 600 },
   });
-  if (error) {
-    console.error("loadStats error", error);
+  if (!r.ok) {
+    console.error("cc_proximity_stats failed", r.status, await r.text());
     return null;
   }
-  const row = Array.isArray(data) ? data[0] : data;
-  return row as ProximityStats;
+  const rows = (await r.json()) as ProximityStats[];
+  return rows?.[0] ?? null;
 }
 
 async function loadClusters(): Promise<Cluster[]> {
