@@ -22,6 +22,8 @@ export default function RootLayout({
           <Link href="/pewsey">Pewsey</Link>
           <Link href="/avebury">Avebury</Link>
           <Link href="/stonehenge">Stonehenge</Link>
+          <Link href="/historical">Historical</Link>
+          <Link href="/candidates">Watch</Link>
           <Link href="/insights">Insights</Link>
         </nav>
         {children}

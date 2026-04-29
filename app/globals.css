@@ -539,6 +539,155 @@ aside.sidebar h2 {
   border-radius: 2px;
 }
 
+/* Historical records */
+.historical-list {
+  margin: 16px 0 32px;
+}
+
+.historical-record {
+  border: 1px solid #232326;
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #16161a;
+}
+
+.historical-record.marginal {
+  background: #131316;
+  border-color: #1d1d20;
+}
+
+.historical-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+  align-items: baseline;
+}
+
+.historical-year {
+  font-weight: 600;
+  color: #d4a73c;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+
+.historical-source {
+  color: #b8b8b8;
+}
+
+.historical-source a {
+  color: #b8b8b8;
+}
+
+.historical-loc {
+  color: #888;
+}
+
+.historical-conf {
+  margin-left: auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.historical-summary {
+  color: #cfcfcf;
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.historical-excerpt {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 2px solid #4a4a52;
+  color: #b8b8b8;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.55;
+  background: #131316;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Candidate (watch list) cards */
+.candidate-list {
+  margin: 16px 0 32px;
+}
+
+.candidate-card {
+  border: 1px solid #232326;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: #16161a;
+}
+
+.candidate-card.matched {
+  background: #131316;
+  border-color: #1f2820;
+}
+
+.candidate-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.candidate-kind {
+  background: #1d1d20;
+  color: #a892ff;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.candidate-time {
+  color: #777;
+}
+
+.candidate-conf {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+}
+
+.candidate-title {
+  display: block;
+  color: #e6e6e6;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 4px 0;
+  text-decoration: none;
+}
+
+.candidate-title:hover {
+  color: #a892ff;
+  text-decoration: underline;
+}
+
+.candidate-row {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.candidate-row span {
+  margin-right: 6px;
+}
+
+.candidate-snippet {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #888;
+  font-style: italic;
+}
+
 /* Small multiples per crop */
 .small-multiples {
   display: grid;
