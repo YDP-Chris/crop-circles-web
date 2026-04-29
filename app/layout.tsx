@@ -19,6 +19,7 @@ export default function RootLayout({
         <nav className="site-nav">
           <Link href="/">Map</Link>
           <Link href="/findings">Findings</Link>
+          <Link href="/pewsey">Pewsey</Link>
           <Link href="/insights">Insights</Link>
         </nav>
         {children}

@@ -301,3 +301,21 @@ aside.sidebar h2 {
   font-size: 12px;
   margin-top: 2px;
 }
+
+/* Pewsey heritage labels */
+.leaflet-tooltip.pewsey-heritage-label {
+  background: rgba(15, 15, 16, 0.85);
+  border: 1px solid #d4a73c;
+  color: #f0c14b;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.leaflet-tooltip.pewsey-heritage-label::before {
+  border-top-color: #d4a73c;
+}
