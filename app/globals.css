@@ -302,6 +302,105 @@ aside.sidebar h2 {
   margin-top: 2px;
 }
 
+/* Distribution bars (lunar / monthly / weekday) */
+.distro-bars {
+  margin: 16px 0;
+}
+
+.distro-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 90px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.distro-label {
+  color: #b8b8b8;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.distro-track {
+  position: relative;
+  height: 14px;
+  background: #1a1a1c;
+  border-radius: 3px;
+}
+
+.distro-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 200ms ease;
+}
+
+.distro-expected-line {
+  position: absolute;
+  top: -3px;
+  height: 20px;
+  width: 1px;
+  background: #555;
+  pointer-events: none;
+}
+
+.distro-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: #cfcfcf;
+}
+
+.distro-sub {
+  color: #666;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* Yearly stacked bars */
+.yearly-bars {
+  margin: 16px 0;
+}
+
+.yearly-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+
+.yearly-year {
+  color: #888;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.yearly-track {
+  display: flex;
+  height: 12px;
+  background: #131315;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.yearly-fill {
+  height: 100%;
+}
+
+.yearly-fill.uk {
+  background: #6dd96a;
+}
+
+.yearly-fill.other {
+  background: #a892ff;
+}
+
+.yearly-count {
+  font-variant-numeric: tabular-nums;
+  color: #cfcfcf;
+}
+
 /* Pewsey heritage labels */
 .leaflet-tooltip.pewsey-heritage-label {
   background: rgba(15, 15, 16, 0.85);
