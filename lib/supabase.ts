@@ -21,6 +21,17 @@ export type Formation = {
   lng: number | null;
   formation_aliases: FormationAlias[];
   formation_images: FormationImage[];
+  formation_nearby_sites: FormationNearbySite[];
+};
+
+export type FormationNearbySite = {
+  distance_m: number;
+  bearing_deg: number | null;
+  heritage_sites: {
+    name: string | null;
+    site_type: string;
+    historic_period: string | null;
+  } | null;
 };
 
 export type FormationAlias = {

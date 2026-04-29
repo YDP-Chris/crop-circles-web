@@ -13,7 +13,11 @@ async function loadFormations(): Promise<Formation[]> {
         id, canonical_id, event_date, country, county, nearest_landmark,
         crop_type, location_precision_m, notes, lat, lng,
         formation_aliases (source_id, source_url, is_primary),
-        formation_images (source_url, photographer, license, width, height)
+        formation_images (source_url, photographer, license, width, height),
+        formation_nearby_sites (
+          distance_m, bearing_deg,
+          heritage_sites ( name, site_type, historic_period )
+        )
       `,
     )
     .order("event_date", { ascending: false, nullsFirst: false });
@@ -53,6 +57,12 @@ export default async function HomePage() {
               <strong>approximate</strong> &mdash; we know the county or
               country and place the dot at that region&rsquo;s centroid.
               Hover a dot for the precise breakdown.
+            </p>
+            <p style={{ color: "#888", marginTop: 8 }}>
+              Click an exact dot to see nearby archaeological / heritage
+              sites within 5km. Heritage data &copy; OpenStreetMap
+              contributors (ODbL); coverage is currently Wessex (southern
+              England).
             </p>
             <p style={{ color: "#666", marginTop: 8 }}>
               Image licensing varies by source. Where we can&rsquo;t

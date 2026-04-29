@@ -71,6 +71,27 @@ export default function MapView({ formations }: { formations: Formation[] }) {
                     Approximate location (county/country centroid)
                   </div>
                 )}
+                {!approx && f.formation_nearby_sites && f.formation_nearby_sites.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>
+                      Nearby heritage sites
+                    </div>
+                    {f.formation_nearby_sites
+                      .slice()
+                      .sort((a, b) => a.distance_m - b.distance_m)
+                      .slice(0, 3)
+                      .map((n, i) => (
+                        <div key={i} style={{ fontSize: 11 }}>
+                          {n.heritage_sites?.name ?? `unnamed ${n.heritage_sites?.site_type ?? "site"}`}{" "}
+                          <span style={{ color: "#888" }}>
+                            {n.distance_m < 1000
+                              ? `${n.distance_m}m`
+                              : `${(n.distance_m / 1000).toFixed(1)}km`}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )}
                 {ccImage && (
                   <div style={{ marginTop: 8 }}>
                     <a href={ccImage} target="_blank" rel="noreferrer">
