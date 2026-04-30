@@ -501,7 +501,8 @@ export default async function FindingsPage() {
       <p className="lead">
         Empirical results from the corpus. Each finding states what we tested,
         what we found, and how confident we are. Numbers refresh as the corpus
-        grows.
+        grows. Heritage proximity now tested UK-wide against {(37802).toLocaleString()}{" "}
+        sites (OSM + Historic England Scheduled Monuments + Cadw + HES).
       </p>
 
       {/* ============================================================== */}
@@ -534,14 +535,16 @@ export default async function FindingsPage() {
           chance
         </div>
         <div className="summary">
-          <strong>{proximity.formation_within_500m_pct}%</strong> of geotagged
-          formations in Wessex sit within 500 m of a heritage site. For random
-          points in the same bounding box, only{" "}
+          <strong>{proximity.formation_within_500m_pct}%</strong> of
+          geotagged formations sit within 500 m of an archaeological /
+          heritage site. For random points sampled UK-wide, only{" "}
           <strong>{proximity.random_within_500m_pct}%</strong> do. Tested on{" "}
           {proximity.formation_count} formations vs {proximity.random_count}{" "}
           random points; median nearest-site distance{" "}
           {fmtMeters(proximity.formation_median_m)} for formations vs{" "}
-          {fmtMeters(proximity.random_median_m)} for random.
+          {fmtMeters(proximity.random_median_m)} for random. Heritage data
+          combines OpenStreetMap, Historic England Scheduled Monuments,
+          Cadw (Wales), and Historic Environment Scotland.
         </div>
       </div>
 
